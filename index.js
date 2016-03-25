@@ -5,7 +5,7 @@ const _ = require('lodash');
 const client = require('rotonde-client/node/rotonde-client')('ws://rotonde:4224');
 const uuid = require('node-uuid');
 
-const conf = require('config.js');
+const conf = require('./config.js');
 
 const send = (port, data) => {
   const status = uuid.v1();
