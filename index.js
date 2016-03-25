@@ -5,28 +5,7 @@ const _ = require('lodash');
 const client = require('rotonde-client/node/rotonde-client')('ws://rotonde:4224');
 const uuid = require('node-uuid');
 
-/**
- * Fill these
- */
-
-const vid = 0x0;
-const pid = 0x0;
-const serial = 0x0;
-
-const baud = 0;
-
-const modulePrefix = '';
-const definitions = [/*{
-  type: 'event' or 'action',
-  identifier: ''
-  fields: [
-    {
-      name: '',
-      type: '',
-      units: '',
-    }
-  ]
-}*/];
+const conf = require('config.js');
 
 const send = (port, data) => {
   const status = uuid.v1();
@@ -57,9 +36,12 @@ const startBionicoHand = (status, port) => {
   };
   _.forEach(definitions, def => {
     client.addLocalDefinition(def.type, def.identifier, def.fields);
+    if (def.type == 'action') {
+      client.actionHandlers.attach(def.identifier, actionHandler);
+    }
   });
 
-  client.eventHandlers.attach('SERIAL_READ', (e) => {
+  const readHandler = (e) => {
     const cmd = e.data.replace(';', '').split(',');
     if (cmd.length < 1) {
       return;
@@ -77,14 +59,23 @@ const startBionicoHand = (status, port) => {
     }, {});
 
     client.sendEvent(def.identifier, data);
-  });
-
-  const handler = (e) => {
-    if (_.isEqual(port, e.data)) {
-      client.eventHandlers.detach('SERIAL_PORT_LOST', handler);
-    }
   };
-  client.eventHandlers.attach('SERIAL_PORT_LOST', handler);
+  client.eventHandlers.attach('SERIAL_READ', readHandler);
+
+  const lostHandler = (e) => {
+    if (!_.isEqual(port, e.data)) {
+      return;
+    }
+    client.eventHandlers.detach('SERIAL_PORT_LOST', handler);
+    client.eventHandlers.detach('SERIAL_READ', readHandler);
+    _.forEach(definitions, def => {
+      client.removeLocalDefinition(def.type, def.identifier, def.fields);
+      if (def.type == 'action') {
+        client.actionHandlers.detach(def.identifier, actionHandler);
+      }
+    });
+  };
+  client.eventHandlers.attach('SERIAL_PORT_LOST', lostHandler);
 }
 
 const processPort = (port) => {
