@@ -98,7 +98,7 @@ const processPort = (port) => {
     port: port.comName,
     baud: baud,
     parser: 'READLINE',
-    separator: '\r\n',
+    separator: ';',
     response: status,
   });
   client.eventHandlers.attachOnce(status, (e) => {
