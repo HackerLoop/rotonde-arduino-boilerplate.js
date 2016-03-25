@@ -1,22 +1,31 @@
 'use strict';
 
-export {
-  vid: 0x0,
-  pid: 0x0,
-  serial: 0x0,
+const _ = require('lodash');
 
-  baud: 0,
+module.exports = {
+  vid: 0x0403,
+  pid: 0x6015,
+  serial: '*',
 
-  modulePrefix: '',
-  definitions: [/*{
-    type: 'event' or 'action',
-    identifier: ''
+  baud: 115200,
+
+  modulePrefix: 'HAND',
+  definitions: [{
+    type: 'action',
+    identifier: 'HAND_FINGERS',
+    processFields: (a, index) => {
+      const cmd = _.reduce(a.data.fingers, (c, f, i) => {
+        return c + ',' + Math.floor(f.position*10000)/10000 + ',' + Math.floor(f.speed*10000)/10000;
+      }, ''+index)+';';
+      console.log(cmd);
+      return cmd;
+    },
     fields: [
       {
-        name: '',
-        type: '',
-        units: '',
+        name: 'fingers',
+        type: 'array',
+        units: 'position: 0-1, speed: 0-1',
       }
-    ]
-  }*/]
+    ],
+  }]
 };
