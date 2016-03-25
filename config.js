@@ -1,22 +1,31 @@
 'use strict';
 
+const _ = require('lodash');
+
 module.exports = {
-  vid: 0x2a03,
-  pid: 0x0043,
-  serial: 553383436393517060,
+  vid: 0x0403,
+  pid: 0x6015,
+  serial: '*',
 
-  baud: 9600,
+  baud: 115200,
 
-  modulePrefix: 'FSR',
+  modulePrefix: 'HAND',
   definitions: [{
-    type: 'event',
-    identifier: 'FSR_PRESSURE',
+    type: 'action',
+    identifier: 'HAND_FINGERS',
+    processFields: (a, index) => {
+      const cmd = _.reduce(a.data.fingers, (c, f, i) => {
+        return c + ',' + Math.floor(f.position*10000)/10000 + ',' + Math.floor(f.speed*10000)/10000;
+      }, ''+index)+';';
+      console.log(cmd);
+      return cmd;
+    },
     fields: [
       {
-        name: 'value',
-        type: 'number',
-        units: '0-1',
-      },
+        name: 'fingers',
+        type: 'array',
+        units: 'position: 0-1, speed: 0-1',
+      }
     ],
   }]
 };
