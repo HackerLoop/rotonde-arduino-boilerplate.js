@@ -9,13 +9,43 @@ module.exports = {
 
   modulePrefix: 'FSR',
   definitions: [{
+    type: 'action',
+    identifier: 'HAND_TEMP_LED',
+    fields: [
+      {
+        name: 'temp',
+        type: 'number',
+        units: 'deg',
+      }
+    ]
+  }, {
+    type: 'action',
+    identifier: 'HAND_VIBRATE',
+    fields: [
+      {
+        name: 'temp',
+        type: 'number',
+        units: 'deg',
+      }
+    ]
+  }, {
     type: 'event',
-    identifier: 'FSR_PRESSURE',
+    identifier: 'HAND_PRESSURE',
     fields: [
       {
         name: 'value',
         type: 'number',
-        units: '0-1',
+        units: '',
+      },
+    ],
+  }, {
+    type: 'event',
+    identifier: 'HAND_TEMPERATURE',
+    fields: [
+      {
+        name: 'value',
+        type: 'number',
+        units: 'deg',
       },
     ],
   }]
