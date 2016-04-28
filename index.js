@@ -33,7 +33,7 @@ const startDevice = (status, port) => {
       cmd = def.processFields(a, index);
     } else {
       cmd = _.reduce(def.fields, (cmd, field) => {
-        return cmd + ',' + a.data[field];
+        return cmd + ',' + a.data[field.name];
       }, index) + ';';
     }
 
@@ -48,13 +48,14 @@ const startDevice = (status, port) => {
   });
 
   const readHandler = (e) => {
-    const cmd = e.data.replace(';', '').split(',');
+    console.log(e);
+    const cmd = e.data.data.replace(';', '').split(',');
     if (cmd.length < 1) {
       return;
     }
     const def = config.definitions[cmd[0]];
 
-    if (def.type != 'event') {
+    if (!def || def.type != 'event') {
       return;
     }
 
@@ -78,7 +79,7 @@ const startDevice = (status, port) => {
     if (!_.isEqual(port, e.data)) {
       return;
     }
-    client.eventHandlers.detach('SERIAL_PORT_LOST', handler);
+    client.eventHandlers.detach('SERIAL_PORT_LOST', lostHandler);
     client.eventHandlers.detach('SERIAL_READ', readHandler);
     _.forEach(config.definitions, def => {
       client.removeLocalDefinition(def.type, def.identifier, def.fields);
